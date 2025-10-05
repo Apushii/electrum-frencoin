@@ -1,14 +1,12 @@
-This software will no longer be updated by me. If you'd like to maintain this software, please reach out.
+_(If you've come here looking to simply run Electrum Frencoin, you may download a prebuilt binary for
+[windows](https://github.com/Apushii/electrum-frencoin/releases/download/v1.2.1/electrum-frencoin-v1.2.1-setup.exe),
+[linux](https://github.com/Apushii/electrum-frencoin/releases/download/v1.2.1/electrum-frencoin-v1.2.1-x86_64.AppImage), and
+[mac](https://github.com/Apushii/electrum-frencoin/releases/download/v1.2.0/electrum-frencoin-v1.2.0.dmg)
+[or see other options](https://github.com/Apushii/electrum-frencoin/releases/latest).)_
 
-_(If you've come here looking to simply run Electrum Ravencoin, you may download a prebuilt binary for
-[windows](https://github.com/Electrum-RVN-SIG/electrum-ravencoin/releases/download/v1.2.1/electrum-ravencoin-v1.2.1-setup.exe),
-[linux](https://github.com/Electrum-RVN-SIG/electrum-ravencoin/releases/download/v1.2.1/electrum-ravencoin-v1.2.1-x86_64.AppImage), and
-[mac](https://github.com/Electrum-RVN-SIG/electrum-ravencoin/releases/download/v1.2.0/electrum-ravencoin-v1.2.0.dmg)
-[or see other options](https://github.com/Electrum-RVN-SIG/electrum-ravencoin/releases/latest).)_
+Migrating from versions earlier than v1.0.0? Read the release notes for [that version](https://github.com/Apushii/electrum-frencoin/releases/tag/v1.0.1).
 
-Migrating from versions earlier than v1.0.0? Read the release notes for [that version](https://github.com/Electrum-RVN-SIG/electrum-ravencoin/releases/tag/v1.0.1).
-
-# Electrum Ravencoin - Lightweight Ravencoin client
+# Electrum Frencoin - Lightweight Frencoin client
 
 ```
 Licence: MIT Licence
@@ -23,7 +21,7 @@ Homepage: https://electrum.org/
 
 ## Run your own server!
 
-https://github.com/Electrum-RVN-SIG/electrumx-ravencoin
+https://github.com/Apushii/electrumx-frencoin
 
 ## Need help?
 
@@ -101,7 +99,7 @@ and [for macOS](contrib/osx/README_macos.md))_
 
 Check out the code from GitHub:
 ```
-$ git clone https://github.com/spesmilo/electrum.git
+$ git clone https://github.com/Apushii/electrum-frencoin.git
 $ cd electrum
 $ git submodule update --init
 ```

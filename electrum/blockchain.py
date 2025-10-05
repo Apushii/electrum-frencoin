@@ -42,8 +42,8 @@ if TYPE_CHECKING:
 
 _logger = get_logger(__name__)
 
-MAX_TARGET = 0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-KAWPOW_LIMIT = 0x0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff
+MAX_TARGET = 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+KAWPOW_LIMIT = 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
 HEADER_SIZE = 120  # bytes
 LEGACY_HEADER_SIZE = 80
@@ -739,7 +739,7 @@ class Blockchain(Logger):
             BlockReading = get_block_reading_from_height((height - 1) - CountBlocks)
 
         bnNew = PastDifficultyAverage
-        nTargetTimespan = CountBlocks * 60  # 1 min
+        nTargetTimespan = CountBlocks * 30  # 15 seconds per block reduced from 60 prefork
 
         nActualTimespan = max(nActualTimespan, nTargetTimespan // 3)
         nActualTimespan = min(nActualTimespan, nTargetTimespan * 3)

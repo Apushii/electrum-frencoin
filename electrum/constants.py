@@ -42,8 +42,8 @@ def read_json(filename, default):
     return r
 
 
-GIT_REPO_URL = "https://github.com/Electrum-RVN-SIG/electrum-ravencoin"
-GIT_REPO_ISSUES_URL = "https://github.com/Electrum-RVN-SIG/electrum-ravencoin/issues"
+GIT_REPO_URL = "https://github.com/Apushii/electrum-frencoin"
+GIT_REPO_ISSUES_URL = "https://github.com/Apushii/electrum-frencoin/issues"
 BIP39_WALLET_FORMATS = read_json('bip39_wallet_formats.json', [])
 
 
@@ -97,7 +97,7 @@ class AbstractNet:
 
     @classmethod
     def max_checkpoint(cls) -> int:
-        # DGW Checkpoints start at height 400,000 and are every 2016 blocks after
+        # DGW Checkpoints start at height 1 and are every 2016 blocks after
         return max(0, cls.DGW_CHECKPOINTS_START + (len(cls.DGW_CHECKPOINTS) * cls.DGW_CHECKPOINTS_SPACING) - 1)
 
     @classmethod
@@ -106,33 +106,33 @@ class AbstractNet:
         return bytes.fromhex(bitcoin.rev_hex(cls.GENESIS))
 
 
-class RavencoinMainnet(AbstractNet):
+class FrencoinMainnet(AbstractNet):
     NET_NAME = "mainnet"
     TESTNET = False
     WIF_PREFIX = 128
-    ADDRTYPE_P2PKH = 60
-    ADDRTYPE_P2SH = 122
-    ADDRTYPE_P2SH_ALT = 122
+    ADDRTYPE_P2PKH = 35
+    ADDRTYPE_P2SH = 95
+    ADDRTYPE_P2SH_ALT = 95
     MATURE = 60
-    SEGWIT_HRP = "rc"
+    SEGWIT_HRP = "dp"
     BOLT11_HRP = SEGWIT_HRP
-    GENESIS = "0000006b444bc2f2ffe627be9d9e7e7a0730000870ef6eb6da46c8eae389df90"
+    GENESIS = "00000022bcd010da6b8d3c2c0e80229ea1f5c0bb4960678d3c26bab2c9b23b9a"
     DEFAULT_PORTS = {'t': '50001', 's': '50002'}
     DEFAULT_SERVERS = read_json('servers.json', {})
-    CHECKPOINTS = read_json('checkpoints.json', [])
+    CHECKPOINTS = []
     DGW_CHECKPOINTS = read_json('checkpoints_dgw.json', [])
     DGW_CHECKPOINTS_SPACING = 2016
-    DGW_CHECKPOINTS_START = 168 * DGW_CHECKPOINTS_SPACING  #338_688, DGW starts at 338_778
+    DGW_CHECKPOINTS_START = 0 
 
-    X16Rv2ActivationTS = 1569945600
-    KawpowActivationTS = 1588788000
-    KawpowActivationHeight = 1219736
-    nDGWActivationBlock = 338778
+    X16Rv2ActivationTS = 0
+    KawpowActivationTS = 1683401242
+    KawpowActivationHeight = 1
+    nDGWActivationBlock = 1
 
-    DEFAULT_MESSAGE_CHANNELS = ['ELECTRUM_RAVENCOIN~notification']
-    ASSET_PREFIX = b'rvn'
-    SHORT_NAME = 'RVN'
-    LONG_NAME = 'Ravencoin'
+    DEFAULT_MESSAGE_CHANNELS = ['ELECTRUM_FRENCOIN~notification']
+    ASSET_PREFIX = b'fren'
+    SHORT_NAME = 'FREN'
+    LONG_NAME = 'Frencoin'
 
     MULTISIG_ASSETS = False
 
@@ -152,7 +152,7 @@ class RavencoinMainnet(AbstractNet):
         'p2wsh': 0x02aa7ed3,  # Zpub
     }
     XPUB_HEADERS_INV = inv_dict(XPUB_HEADERS)
-    BIP44_COIN_TYPE = 175
+    BIP44_COIN_TYPE = 42066
 
     BURN_AMOUNTS = BurnAmounts(
         IssueAssetBurnAmount=500,
@@ -167,20 +167,20 @@ class RavencoinMainnet(AbstractNet):
     )
 
     BURN_ADDRESSES = BurnAddresses(
-        IssueAssetBurnAddress='RXissueAssetXXXXXXXXXXXXXXXXXhhZGt',
-        ReissueAssetBurnAddress='RXReissueAssetXXXXXXXXXXXXXXVEFAWu',
-        IssueSubAssetBurnAddress='RXissueSubAssetXXXXXXXXXXXXXWcwhwL',
-        IssueUniqueAssetBurnAddress='RXissueUniqueAssetXXXXXXXXXXWEAe58',
-        IssueMsgChannelAssetBurnAddress='RXissueMsgChanneLAssetXXXXXXSjHvAY',
-        IssueQualifierAssetBurnAddress='RXissueQuaLifierXXXXXXXXXXXXUgEDbC',
-        IssueSubQualifierAssetBurnAddress='RXissueSubQuaLifierXXXXXXXXXVTzvv5',
-        IssueRestrictedAssetBurnAddress='RXissueRestrictedXXXXXXXXXXXXzJZ1q',
-        AddNullQualifierTagBurnAddress='RXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya',
-        GlobalBurnAddress='RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV'
+        IssueAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        ReissueAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueSubAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueUniqueAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueMsgChannelAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueQualifierAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueSubQualifierAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        IssueRestrictedAssetBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        AddNullQualifierTagBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK',
+        GlobalBurnAddress='FNwgpD57TYBbqzSr86qXttRgZxYYumcfyK'
     )
 
 
-class RavencoinTestnet(AbstractNet):
+class FrencoinTestnet(AbstractNet):
     NET_NAME = "testnet"
     BIP44_COIN_TYPE = 1
     LN_REALM_BYTE = 0
@@ -208,9 +208,9 @@ class RavencoinTestnet(AbstractNet):
     nDGWActivationBlock = 1
 
     DEFAULT_MESSAGE_CHANNELS = []
-    ASSET_PREFIX = b'rvn'
-    SHORT_NAME = 'tRVN'
-    LONG_NAME = 'Ravencoin'
+    ASSET_PREFIX = b'fren'
+    SHORT_NAME = 'tFREN'
+    LONG_NAME = 'Frencoin'
     MULTISIG_ASSETS = False
     
     XPRV_HEADERS = {
@@ -266,13 +266,13 @@ def all_subclasses(cls):
 NETS_LIST = tuple(all_subclasses(AbstractNet))
 
 # don't import net directly, import the module instead (so that net is singleton)
-net = RavencoinMainnet
+net = FrencoinMainnet
 
 
 def set_mainnet():
     global net
-    net = RavencoinMainnet
+    net = FrencoinMainnet
 
 def set_testnet():
     global net
-    net = RavencoinTestnet
+    net = FrencoinTestnet
