@@ -1,351 +1,649 @@
-# -*- coding: utf-8 -*-
 """
-Unified futuristic stylesheet patcher for Electrum fork
-- Green-forward theme with blue secondary accents and white text
-- Works across Linux, Windows, macOS
-- API preserved: patch_qt_stylesheet(use_dark_theme: bool = True)
+This is used to patch the QApplication style sheet.
+It reads the current stylesheet, appends our modifications and sets the new stylesheet.
 """
 
-from typing import Optional
 import sys
 
-# The same QSS is used for all OS-specific constants, so the theme is consistent.
-CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX = r"""
-/* ===== Frencoin Futuristic Theme (Green-forward, Blue secondary) =====
-   Palette:
-     - bg0: #0A0E12 (deep black-blue)
-     - bg1: #0E141B
-     - bg2: #111A24
-     - text: #EAF2FF (soft white)
-     - textMuted: #A7B3C5
-     - accentBlue: #2DD4FF
-     - accentGreen: #22E584 (PRIMARY accent)
-     - warn: #F5A524
-     - border: #1E2A36
-     - borderFocus: #22E584 (more green focus)
-     - borderAccent: #22E584
+from PyQt5 import QtWidgets
+
+
+CUSTOM_PATCH_FOR_DARK_THEME = '''
+/* 
+   Professional dark theme with grey backgrounds, green primary accents, and blue secondary highlights.
+   Uses sharp, narrow borders for a clean, modern appearance.
 */
 
-@define-color bg0 #0A0E12;
-@define-color bg1 #0E141B;
-@define-color bg2 #111A24;
-@define-color text #EAF2FF;
-@define-color textMuted #A7B3C5;
-@define-color accentBlue #2DD4FF;
-@define-color accentGreen #22E584;
-@define-color warn #F5A524;
-@define-color border #1E2A36;
-@define-color borderFocus #22E584;
-@define-color borderAccent #22E584;
-
-/* ---------- Global ---------- */
-* {
-  color: @text;
-  background: transparent;
-}
-
+/* 1) Overall application background and text color */
 QWidget {
-  background-color: @bg1;
-  color: @text;
+    background-color: #121212; /* Dark grey background */
+    color: #cccccc;            /* Medium light grey text */
+    border: none;
 }
 
-/* Headings and green text accents */
-QGroupBox::title,
-QDockWidget::title,
-QTabBar::tab:selected,
-QHeaderView::section:checked {
-  color: @accentGreen;
+/* 2) Main window */
+QMainWindow {
+    background-color: #1e1e1e; /* Medium dark grey background */
+    border: 1px solid #2e7d32;   /* Muted green border */
 }
 
-QLabel[role="hint"],
-QLabel[role="success"],
-QLabel[class~="accent"],
-QToolTip {
-  color: @accentGreen;
-}
-
-/* Links */
-QLabel[openExternalLinks="true"],
-QTextBrowser,
-QTextBrowser QTextItem,
-QTextBrowser::item,
-QTextEdit {
-  color: @text;
-}
-QLabel[openExternalLinks="true"]::hover,
-QTextBrowser a,
-QTextEdit a {
-  color: @accentGreen;
-  text-decoration: none;
-}
-
-/* ---------- Panels / Cards ---------- */
-QFrame, QGroupBox, QDockWidget, QToolBox, QStackedWidget, QListView, QTreeView, QTableView, QTextEdit, QPlainTextEdit {
-  background-color: @bg0;
-  border: 1px solid @border;
-  border-radius: 8px;
-}
-
-/* Headers */
-QHeaderView::section {
-  background-color: @bg2;
-  color: @textMuted;
-  padding: 6px 8px;
-  border: 1px solid @border;
-}
-
-/* Tables / Lists selection (green highlight) */
-QTreeView::item:selected,
-QListView::item:selected,
-QTableView::item:selected,
-QTextEdit::selection,
-QPlainTextEdit::selection {
-  background-color: #133B3F; /* deep teal-green */
-  color: @text;
-}
-
-/* ---------- Buttons ---------- */
-QPushButton {
-  background-color: @bg2;
-  color: @text;
-  border: 1px solid @border;
-  border-radius: 8px;
-  padding: 7px 12px;
-}
-QPushButton:hover,
-QToolButton:hover {
-  border-color: @borderAccent;
-}
-QPushButton:pressed {
-  background-color: @bg1;
-}
-/* Primary emphasis via green */
-QPushButton[default="true"],
-QPushButton:checked {
-  background-color: @accentGreen;
-  color: #0A0E12;
-  border: 1px solid @accentGreen;
-}
-/* Secondary/ghost with green text accent */
-QPushButton[flat="true"] {
-  background: transparent;
-  border-color: transparent;
-  color: @accentGreen;
-}
-QPushButton[flat="true"]:hover {
-  color: @text;
-  border-color: @borderAccent;
-}
-
-/* ---------- Inputs ---------- */
-QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QTextEdit, QPlainTextEdit, QDateTimeEdit {
-  background-color: @bg0;
-  border: 1px solid @border;
-  border-radius: 8px;
-  padding: 6px 8px;
-  selection-background-color: #133B3F;
-  selection-color: @text;
-}
-QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QTextEdit:focus, QPlainTextEdit:focus, QDateTimeEdit:focus {
-  border: 1px solid @borderFocus;
-  box-shadow: 0 0 0 2px rgba(34,229,132,0.15);
-}
-
-/* Dropdowns */
-QComboBox::drop-down {
-  border-left: 1px solid @border;
-}
-QComboBox::down-arrow { width: 10px; height: 10px; }
-QComboBox QAbstractItemView {
-  background-color: @bg0;
-  border: 1px solid @border;
-  selection-background-color: #133B3F;
-}
-
-/* ---------- Tabs ---------- */
-QTabWidget::pane {
-  border: 1px solid @border;
-  border-radius: 8px;
-  top: -1px;
-}
-QTabBar::tab {
-  background: @bg2;
-  color: @textMuted;
-  border: 1px solid @border;
-  border-bottom-color: @border;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  padding: 6px 10px;
-  margin-right: 2px;
-}
-QTabBar::tab:hover {
-  color: @text;
-  border-color: @borderAccent;
-}
-QTabBar::tab:selected {
-  background: @bg1;
-  color: @accentGreen; /* green text accent when active */
-  border-color: @borderAccent;
-}
-
-/* ---------- Checkboxes & Radios ---------- */
-QCheckBox, QRadioButton { color: @text; }
-QCheckBox::indicator, QRadioButton::indicator {
-  width: 16px; height: 16px;
-  border: 1px solid @border;
-  border-radius: 4px;
-  background: @bg2;
-}
-QCheckBox::indicator:checked,
-QRadioButton::indicator:checked {
-  background: @accentGreen;
-  border: 1px solid @accentGreen;
-}
-
-/* ---------- Sliders / Progress ---------- */
-QSlider::groove:horizontal {
-  height: 6px;
-  background: @bg2;
-  border-radius: 3px;
-}
-QSlider::handle:horizontal {
-  width: 14px; margin: -6px 0; border-radius: 7px;
-  background: @accentGreen;
-  border: 1px solid @accentGreen;
-}
-QProgressBar {
-  background: @bg2;
-  border: 1px solid @border;
-  border-radius: 8px;
-  text-align: center;
-  color: @text;
-}
-QProgressBar::chunk { background-color: @accentGreen; border-radius: 8px; }
-
-/* ---------- Scrollbars ---------- */
-QScrollBar:vertical, QScrollBar:horizontal {
-  background: @bg1;
-  border: 1px solid @border;
-  border-radius: 8px;
-}
-QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
-  background: @bg2;
-  border: 1px solid @border;
-  border-radius: 8px;
-}
-QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
-  border-color: @accentGreen;
-}
-QScrollBar::add-line, QScrollBar::sub-line {
-  background: @bg1;
-  border: none;
-  height: 0px; width: 0px;
-}
-
-/* ---------- Toolbars / Status ---------- */
-QToolBar {
-  background: @bg1;
-  border-bottom: 1px solid @border;
-}
-QStatusBar {
-  background: @bg1;
-  color: @textMuted;
-  border-top: 1px solid @border;
-}
-QStatusBar QLabel[class~="ok"] { color: @accentGreen; }
-QStatusBar QLabel[class~="warn"] { color: @warn; }
-
-/* ---------- Menus ---------- */
+/* 3) Menubar */
 QMenuBar {
-  background: @bg1;
-  color: @text;
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
 }
-QMenuBar::item:selected { background: @bg2; color: @accentGreen; }
+QMenuBar::item:selected {
+    background-color: #2e7d32; /* Muted green when selected */
+    color: #ffffff;            /* White text on selection */
+}
+
+/* 4) Drop-down menus */
 QMenu {
-  background: @bg0;
-  border: 1px solid @border;
+    background-color: #121212; /* Dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
 }
 QMenu::item:selected {
-  background: #133B3F;
-  color: @text;
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
 }
 
-/* ---------- Tooltips ---------- */
-QToolTip {
-  background-color: @bg2;
-  color: @accentGreen; /* readable green text hint */
-  border: 1px solid @borderAccent;
-  padding: 6px 10px;
-  border-radius: 8px;
+/* 5) Toolbars */
+QToolBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
 }
-"""
-CUSTOM_PATCH_FOR_DEFAULT_THEME_WINDOWS = CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX
-CUSTOM_PATCH_FOR_DEFAULT_THEME_MACOS = CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX
-CUSTOM_PATCH_FOR_DARK_THEME = CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX
 
-def _choose_default_qss() -> str:
-    if sys.platform.startswith("win"):
-        return CUSTOM_PATCH_FOR_DEFAULT_THEME_WINDOWS
-    elif sys.platform == "darwin":
-        return CUSTOM_PATCH_FOR_DEFAULT_THEME_MACOS
-    else:
-        return CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX
+/* 6) Tabs and tab bars */
+QTabWidget::pane {
+    background-color: #121212; /* Dark grey */
+    border: 1px solid #1e1e1e; /* Medium dark grey border */
+    padding: 2px;
+}
+QTabBar::tab {
+    background-color: #2e7d32; /* Muted green */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    margin: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #ffffff;            /* White text */
+    border-bottom: 2px solid #1976d2; /* Blue underline for selected tab */
+}
 
-def _apply_dark_palette(app) -> None:
-    # Set a palette that matches our stylesheet for widgets that ignore QSS in places.
-    try:
-        from PyQt5 import QtGui  # type: ignore
-    except Exception:
-        try:
-            from PySide2 import QtGui  # type: ignore
-        except Exception:
-            return
+/* 7) StatusBarButton (e.g., bottom-right icons) */
+StatusBarButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin: 0px;
+    padding: 2px;
+}
+StatusBarButton:checked {
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+StatusBarButton:pressed,
+StatusBarButton:hover {
+    border: 1px solid #1976d2; /* Blue border on hover/press */
+}
 
-    text = QtGui.QColor("#EAF2FF")
-    disabled = QtGui.QColor("#A7B3C5")
-    window = QtGui.QColor("#0E141B")
-    base = QtGui.QColor("#0A0E12")
+/* 8) Table headers (e.g., transaction history columns) */
+QHeaderView::section {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    padding: 4px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
 
-    palette = app.palette()
-    palette.setColor(QtGui.QPalette.Window, window)
-    palette.setColor(QtGui.QPalette.WindowText, text)
-    palette.setColor(QtGui.QPalette.Base, base)
-    palette.setColor(QtGui.QPalette.AlternateBase, window)
-    palette.setColor(QtGui.QPalette.ToolTipBase, window)
-    palette.setColor(QtGui.QPalette.ToolTipText, text)
-    palette.setColor(QtGui.QPalette.Text, text)
-    palette.setColor(QtGui.QPalette.Button, window)
-    palette.setColor(QtGui.QPalette.ButtonText, text)
-    palette.setColor(QtGui.QPalette.BrightText, text)
-    palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor("#133B3F"))
-    palette.setColor(QtGui.QPalette.HighlightedText, text)
-    palette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, disabled)
-    palette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, disabled)
-    app.setPalette(palette)
+/* 9) Table contents (e.g., transaction history rows) */
+QTableView {
+    background-color: #121212; /* Dark grey */
+    gridline-color: #1976d2;   /* Blue gridlines */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 0px;
+}
+QTableView::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
 
-def patch_qt_stylesheet(use_dark_theme: bool = True, app: Optional[object] = None) -> None:
-    """Append our stylesheet to the running QApplication.
-    Args:
-        use_dark_theme: If True, use CUSTOM_PATCH_FOR_DARK_THEME; otherwise use per-OS default.
-        app: optionally pass the QApplication; otherwise we will find the instance.
-    """
-    if app is None:
-        try:
-            from PyQt5 import QtWidgets  # type: ignore
-        except Exception:
-            try:
-                from PySide2 import QtWidgets  # type: ignore
-            except Exception:
-                return
-        qapp = QtWidgets.QApplication.instance()
-    else:
-        qapp = app
+/* 10) Scroll areas, line edits, and combo boxes */
+QAbstractScrollArea {
+    padding: 0px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+QLineEdit {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    color: #cccccc;
+    selection-background-color: #1976d2; /* Blue selection */
+    selection-color: #ffffff;
+}
+QAbstractItemView QLineEdit {
+    padding: 0px;
+    show-decoration-selected: 1;
+}
+QComboBox {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+    color: #cccccc;
+}
+QComboBox::drop-down {
+    border: 1px solid #2e7d32; /* Muted green */
+}
+QComboBox::item:checked {
+    font-weight: bold;
+    max-height: 30px;
+    background-color: #1976d2; /* Blue */
+    color: #ffffff;
+}
 
-    if qapp is None:
-        return
+/* 11) Push buttons */
+QPushButton {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 5px 10px;
+}
+QPushButton:hover {
+    background-color: #1976d2; /* Blue hover */
+    color: #ffffff;
+}
+QPushButton:pressed {
+    background-color: #2e7d32; /* Muted green pressed */
+    color: #ffffff;
+}
+'''
 
-    # Use the exact same dark theme QSS everywhere for consistency and readability.
-    qss = CUSTOM_PATCH_FOR_DARK_THEME
-    _apply_dark_palette(qapp)
-    existing = qapp.styleSheet() or ""
-    qapp.setStyleSheet(existing + ("\n\n" if existing else "") + qss)
+CUSTOM_PATCH_FOR_DEFAULT_THEME_MACOS = '''
+/* 
+   Professional dark theme with grey backgrounds, green primary accents, and blue secondary highlights, adapted for macOS.
+   Uses sharp, narrow borders for a clean, modern appearance.
+*/
+
+/* 1) Overall application background and text color for all widgets */
+QWidget {
+    background-color: #121212; /* Dark grey background */
+    color: #cccccc;            /* Medium light grey text */
+    border: none;
+}
+
+/* 2) Main window specifically */
+QMainWindow {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 3) Menubar */
+QMenuBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+QMenuBar::item:selected {
+    background-color: #2e7d32; /* Muted green */
+    color: #ffffff;            /* White text */
+}
+
+/* 4) Drop-down menus */
+QMenu {
+    background-color: #121212; /* Dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+}
+QMenu::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 5) Toolbars */
+QToolBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+
+/* 6) Tabs and tab bars */
+QTabWidget::pane {
+    background-color: #121212; /* Dark grey */
+    border: 1px solid #1e1e1e; /* Medium dark grey border */
+    padding: 2px;
+}
+QTabBar::tab {
+    background-color: #2e7d32; /* Muted green */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    margin: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #ffffff;            /* White text */
+    border-bottom: 2px solid #1976d2; /* Blue underline for selected tab */
+}
+
+/* 7) StatusBarButton (bottom-right icons) */
+StatusBarButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin: 0px;
+    padding: 2px;
+}
+StatusBarButton:checked {
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+StatusBarButton:pressed,
+StatusBarButton:hover {
+    border: 1px solid #1976d2; /* Blue border on hover/press */
+}
+
+/* 8) Table headers (e.g., transaction history columns) */
+QHeaderView::section {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    padding: 4px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 9) Table contents (e.g., transaction history rows) */
+QTableView {
+    background-color: #121212; /* Dark grey */
+    gridline-color: #1976d2;   /* Blue gridlines */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 0px;
+}
+QTableView::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 10) Scroll areas, line edits, combo boxes */
+QAbstractScrollArea {
+    padding: 0px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+QLineEdit {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    color: #cccccc;
+    selection-background-color: #1976d2; /* Blue selection */
+    selection-color: #ffffff;
+}
+QAbstractItemView QLineEdit {
+    padding: 0px;
+    show-decoration-selected: 1;
+}
+QComboBox {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+    color: #cccccc;
+}
+QComboBox::drop-down {
+    border: 1px solid #2e7d32; /* Muted green */
+}
+QComboBox::item:checked {
+    font-weight: bold;
+    max-height: 30px;
+    background-color: #1976d2; /* Blue */
+    color: #ffffff;
+}
+
+/* 11) Push buttons */
+QPushButton {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 5px 10px;
+}
+QPushButton:hover {
+    background-color: #1976d2; /* Blue hover */
+    color: #ffffff;
+}
+QPushButton:pressed {
+    background-color: #2e7d32; /* Muted green pressed */
+    color: #ffffff;
+}
+'''
+
+
+CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX = '''
+/* 
+   Professional dark theme with grey backgrounds, green primary accents, and blue secondary highlights, adapted for Linux.
+   Uses sharp, narrow borders for a clean, modern appearance.
+*/
+
+/* 1) Overall application background and text color for all widgets */
+QWidget {
+    background-color: #121212; /* Dark grey background */
+    color: #cccccc;            /* Medium light grey text */
+    border: none;
+}
+
+/* 2) Main window specifically */
+QMainWindow {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 3) Menubar (File, Wallet, Tools, Help) */
+QMenuBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+QMenuBar::item:selected {
+    background-color: #2e7d32; /* Muted green */
+    color: #ffffff;            /* White text */
+}
+
+/* 4) Drop-down menus */
+QMenu {
+    background-color: #121212; /* Dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+}
+QMenu::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 5) Toolbars (if any) */
+QToolBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+
+/* 6) Tabs and tab bars (History, Send, Receive, etc.) */
+QTabWidget::pane {
+    background-color: #121212; /* Dark grey */
+    border: 1px solid #1e1e1e; /* Medium dark grey border */
+    padding: 2px;
+}
+QTabBar::tab {
+    background-color: #2e7d32; /* Muted green */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    margin: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #ffffff;            /* White text */
+    border-bottom: 2px solid #1976d2; /* Blue underline for selected tab */
+}
+
+/* 7) StatusBarButton (bottom-right icons) */
+StatusBarButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin: 0px;
+    padding: 2px;
+}
+StatusBarButton:checked {
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+StatusBarButton:pressed,
+StatusBarButton:hover {
+    border: 1px solid #1976d2; /* Blue border on hover/press */
+}
+
+/* 8) Table headers (e.g., transaction history columns) */
+QHeaderView::section {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    padding: 4px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 9) Table contents (e.g., transaction history rows) */
+QTableView {
+    background-color: #121212; /* Dark grey */
+    gridline-color: #1976d2;   /* Blue gridlines */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 0px;
+}
+QTableView::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 10) Scroll areas, line edits, combo boxes */
+QAbstractScrollArea {
+    padding: 0px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+QLineEdit {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    color: #cccccc;
+    selection-background-color: #1976d2; /* Blue selection */
+    selection-color: #ffffff;
+}
+QAbstractItemView QLineEdit {
+    padding: 0px;
+    show-decoration-selected: 1;
+}
+QComboBox {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+    color: #cccccc;
+}
+QComboBox::drop-down {
+    border: 1px solid #2e7d32; /* Muted green */
+}
+QComboBox::item:checked {
+    font-weight: bold;
+    max-height: 30px;
+    background-color: #1976d2; /* Blue */
+    color: #ffffff;
+}
+
+/* 11) Push buttons */
+QPushButton {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 5px 10px;
+}
+QPushButton:hover {
+    background-color: #1976d2; /* Blue hover */
+    color: #ffffff;
+}
+QPushButton:pressed {
+    background-color: #2e7d32; /* Muted green pressed */
+    color: #ffffff;
+}
+'''
+
+CUSTOM_PATCH_FOR_DEFAULT_THEME_WINDOWS = '''
+/* 
+   Professional dark theme with grey backgrounds, green primary accents, and blue secondary highlights, adapted for Windows.
+   Uses sharp, narrow borders for a clean, modern appearance.
+*/
+
+/* 1) Overall application background and text color for all widgets */
+QWidget {
+    background-color: #121212; /* Dark grey background */
+    color: #cccccc;            /* Medium light grey text */
+    border: none;
+}
+
+/* 2) Main window specifically */
+QMainWindow {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 3) Menubar */
+QMenuBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+QMenuBar::item:selected {
+    background-color: #2e7d32; /* Muted green */
+    color: #ffffff;            /* White text */
+}
+
+/* 4) Drop-down menus */
+QMenu {
+    background-color: #121212; /* Dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+}
+QMenu::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 5) Toolbars */
+QToolBar {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+}
+
+/* 6) Tabs and tab bars */
+QTabWidget::pane {
+    background-color: #121212; /* Dark grey */
+    border: 1px solid #1e1e1e; /* Medium dark grey border */
+    padding: 2px;
+}
+QTabBar::tab {
+    background-color: #2e7d32; /* Muted green */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    margin: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #ffffff;            /* White text */
+    border-bottom: 2px solid #1976d2; /* Blue underline for selected tab */
+}
+
+/* 7) StatusBarButton */
+StatusBarButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin: 0px;
+    padding: 2px;
+}
+StatusBarButton:checked {
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+StatusBarButton:pressed,
+StatusBarButton:hover {
+    border: 1px solid #1976d2; /* Blue border on hover/press */
+}
+
+/* 8) Table headers */
+QHeaderView::section {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    padding: 4px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+
+/* 9) Table contents */
+QTableView {
+    background-color: #121212; /* Dark grey */
+    gridline-color: #1976d2;   /* Blue gridlines */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 0px;
+}
+QTableView::item:selected {
+    background-color: #1976d2; /* Blue selection */
+    color: #ffffff;            /* White text */
+}
+
+/* 10) Scroll areas, line edits, combo boxes */
+QAbstractScrollArea {
+    padding: 0px;
+    border: 1px solid #2e7d32; /* Muted green border */
+}
+QLineEdit {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 4px;
+    color: #cccccc;
+    selection-background-color: #1976d2; /* Blue selection */
+    selection-color: #ffffff;
+}
+QAbstractItemView QLineEdit {
+    padding: 0px;
+    show-decoration-selected: 1;
+}
+QComboBox {
+    background-color: #1e1e1e; /* Medium dark grey */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 2px;
+    color: #cccccc;
+}
+QComboBox::drop-down {
+    border: 1px solid #2e7d32; /* Muted green */
+}
+QComboBox::item:checked {
+    font-weight: bold;
+    max-height: 30px;
+    background-color: #1976d2; /* Blue */
+    color: #ffffff;
+}
+
+/* 11) Push buttons */
+QPushButton {
+    background-color: #1e1e1e; /* Medium dark grey */
+    color: #cccccc;            /* Medium light grey text */
+    border: 1px solid #2e7d32; /* Muted green border */
+    padding: 5px 10px;
+}
+QPushButton:hover {
+    background-color: #1976d2; /* Blue hover */
+    color: #ffffff;
+}
+QPushButton:pressed {
+    background-color: #2e7d32; /* Muted green pressed */
+    color: #ffffff;
+}
+'''
+
+# Example dark theme placeholder (if needed)
+# CUSTOM_PATCH_FOR_DARK_THEME = '/* dark theme styles go here */'
+
+def patch_qt_stylesheet(use_dark_theme: bool) -> None:
+    import sys
+    from PyQt5 import QtWidgets  # or PySide2, depending on your setup
+
+    custom_patch = ""
+    if use_dark_theme:
+        custom_patch = CUSTOM_PATCH_FOR_DARK_THEME
+    else:  # default (light) theme
+        if sys.platform == 'darwin':
+            # macOS-specific theme (assumed to be defined elsewhere)
+            custom_patch = CUSTOM_PATCH_FOR_DEFAULT_THEME_MACOS
+        elif sys.platform == 'win32':
+            custom_patch = CUSTOM_PATCH_FOR_DEFAULT_THEME_WINDOWS
+        else:
+            custom_patch = CUSTOM_PATCH_FOR_DEFAULT_THEME_LINUX
+
+    app = QtWidgets.QApplication.instance()
+    style_sheet = app.styleSheet() + custom_patch
+    app.setStyleSheet(style_sheet)
